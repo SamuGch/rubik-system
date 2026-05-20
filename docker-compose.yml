@@ -1,0 +1,50 @@
+
+services:
+  # 1. Base de Datos - MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: rubikbot_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - rubikbot_net
+
+  # 2. Servidor Backend - Log de Eventos (Node.js/Express)
+  backend:
+    build: ./backend
+    container_name: rubikbot_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      # Se conecta usando el nombre del contenedor de la BD ("mongodb")
+      - MONGO_URI=mongodb://mongodb:27017/rubikbot_logs 
+      - PORT=5000
+    depends_on:
+      - mongodb
+    networks:
+      - rubikbot_net
+
+  # 3. Frontend - Dashboard de Visualización (React)
+  frontend:
+    build: ./frontend
+    container_name: rubikbot_frontend
+    restart: always
+    ports:
+      - "5173:80" # Puerto por defecto si usas Vite
+    depends_on:
+      - backend
+    networks:
+      - rubikbot_net
+
+# Volúmenes para persistencia de datos
+volumes:
+  mongo_data:
+
+# Red interna para que los contenedores se comuniquen
+networks:
+  rubikbot_net:
+    driver: bridge
