@@ -1,70 +1,72 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const Cube = require('cubejs'); // Regresamos a cubejs en su entorno correcto
 
 const app = express();
+const PORT = 3000;
 
-// Middlewares
+// Inicializamos el motor en Express (carga las tablas en la RAM de tu compu)
+console.log("🧠 Inicializando el motor de búsqueda del cubo...");
+Cube.initSolver();
+console.log("✅ Motor matemático listo.");
+
 app.use(cors());
-app.use(express.json()); // Permite recibir datos en formato JSON
+app.use(express.json());
 
-// Conexión a MongoDB (Usa la variable de entorno de Docker o localhost por defecto)
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/rubikbot_logs';
-
-mongoose.connect(mongoURI)
-  .then(() => console.log('✅ Conectado a MongoDB exitosamente'))
-  .catch(err => console.error('❌ Error conectando a MongoDB:', err));
-
-// Definir el Esquema (Estructura) del Log de Eventos
-const eventoSchema = new mongoose.Schema({
-  tipo_accion: { type: String, required: true }, // Ej: 'RESOLUCION_COMPLETADA', 'ERROR_MOTOR', 'ESCANEO'
-  timestamp: { type: Date, default: Date.now },
-  tiempo_segundos: { type: Number, default: 0 },
-  movimientos: { type: String, default: 'N/A' },
-  detalles: { type: String, default: '' }
+// Ruta de prueba
+app.get('/', (req, res) => {
+    res.send('Servidor del Cubo Rubik funcionando correctamente 🚀');
 });
 
-const Evento = mongoose.model('Evento', eventoSchema);
+// Endpoint principal
+app.post('/api/solve', (req, res) => {
+    const { estado } = req.body;
 
-// ==========================================
-// ENDPOINTS (Rutas HTTP)
-// ==========================================
+    // Kociemba y cubejs exigen exactamente 54 letras
+    if (!estado || estado.length !== 54) {
+        return res.status(400).json({ 
+            exito: false, 
+            error: `El estado debe tener exactamente 54 caracteres. Recibido: ${estado ? estado.length : 0}` 
+        });
+    }
 
-// 1. Endpoint para RECIBIR eventos desde el Robot (POST)
-app.post('/api/eventos', async (req, res) => {
-  try {
-    const { tipo_accion, tiempo_segundos, movimientos, detalles } = req.body;
-    
-    // Crear un nuevo registro
-    const nuevoEvento = new Evento({
-      tipo_accion,
-      tiempo_segundos,
-      movimientos,
-      detalles
-    });
+    try {
+        console.log("Calculando solución para el estado:", estado);
 
-    // Guardar en MongoDB
-    await nuevoEvento.save();
-    
-    res.status(201).json({ mensaje: 'Evento registrado con éxito', evento: nuevoEvento });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al registrar el evento', detalles: error.message });
-  }
+        // 1. Cargamos tu string perfecto de 54 letras
+        const cubo = Cube.fromString(estado);
+        
+        // ✨ LA CORRECCIÓN: Interceptamos si el cubo ya está armado
+        if (cubo.isSolved()) {
+            console.log("✅ El cubo ya está perfectamente armado. Ignorando cálculo.");
+            return res.json({
+                exito: true,
+                mensaje: "El cubo ya está resuelto",
+                solucion: "" // Retornamos vacío para que React muestre el texto por defecto
+            });
+        }
+
+        // 2. Si NO está resuelto, entonces sí forzamos al motor a calcular
+        const solucionReal = cubo.solve();
+
+        console.log("✅ Solución encontrada:", solucionReal || "El cubo ya está resuelto");
+
+        res.json({
+            exito: true,
+            mensaje: "Solución calculada exitosamente en el servidor",
+            solucion: solucionReal
+        });
+
+    } catch (error) {
+        console.error("Error al calcular:", error.message);
+        // cubejs lanza un error por defecto si el cubo tiene colores físicamente imposibles
+        res.status(400).json({ 
+            exito: false, 
+            error: "Configuración matemáticamente imposible. Revisa los colores del cubo." 
+        });
+    }
 });
 
-// 2. Endpoint para ENVIAR eventos al Frontend/Dashboard (GET)
-app.get('/api/eventos', async (req, res) => {
-  try {
-    // Busca todos los eventos y los ordena del más reciente al más antiguo
-    const eventos = await Evento.find().sort({ timestamp: -1 });
-    res.status(200).json(eventos);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el historial', detalles: error.message });
-  }
-});
-
-// Iniciar el servidor
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor Backend corriendo en el puerto ${PORT}`);
+    console.log(`Servidor de Express escuchando en http://localhost:${PORT}`);
 });

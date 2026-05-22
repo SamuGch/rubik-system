@@ -101,25 +101,38 @@ export default function CubeInput() {
     }
 
     try {
-      // 2. Resolver cubo con cubejs
-      const solution = await solveRubik(cube);
+      // 2. Petición al servidor Express (backend)
+      const respuestaBackend = await solveRubik(cube);
 
-      // 3. Todo correcto
-      setError('');
-      setIsValidated(true);
-      setInvalidEdges([]);
-      setMovesList(
-        solution || 'El cubo ya está resuelto.'
-      );
+      // Verificamos si Express respondió con éxito
+      if (respuestaBackend && respuestaBackend.exito) {
+        // 3. Todo correcto
+        setError('');
+        setIsValidated(true);
+        setInvalidEdges([]);
+        
+        // ¡Aquí está la magia! Sacamos solo el string de la solución
+        setMovesList(
+          respuestaBackend.solucion || 'El cubo ya está resuelto.'
+        );
+      } else {
+        // Si el backend falló (ej. error 400 de validación)
+        setError(respuestaBackend.error || 'Error al calcular la solución en el servidor.');
+        setIsValidated(false);
+        setInvalidEdges([]);
+        setMovesList('');
+      }
+      
     } catch (error) {
-      console.error(error);
+      console.error("Error en la conexión:", error);
 
       setError(
-        'El cubo no tiene una configuración válida.'
+        'No se pudo conectar con el servidor. Verifica que Express esté corriendo.'
       );
 
       setIsValidated(false);
       setInvalidEdges([]);
+      setMovesList('');
     }
   };
 
