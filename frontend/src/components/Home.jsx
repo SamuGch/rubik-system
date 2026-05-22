@@ -36,12 +36,12 @@ export default function Home() {
         </Link>
 
         {/* Botón: Configuración del Robot */}
-        <button className="/configuracion" 
+        <Link to="/configuracion" 
               className="flex flex-col items-center justify-center bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700 rounded-2xl p-8 shadow-lg group">
           <span className="text-5xl mb-4 group-hover:scale-110 transition-transform">⚙️</span>
           <h2 className="text-2xl font-bold">Configuración</h2>
           <p className="text-gray-400 text-center mt-2 text-sm">Ajustes del robot y motores</p>
-        </button>
+        </Link>
 
         {/* Botón: Estado del Sistema */}
         <button className="/estado" 

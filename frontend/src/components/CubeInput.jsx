@@ -27,6 +27,7 @@ export default function CubeInput() {
   const [error, setError] = useState('');
   const [isValidated, setIsValidated] = useState(false);
   const [movesList, setMovesList] = useState('');
+  const [sendingRobot, setSendingRobot] = useState(false);
   const [invalidEdges, setInvalidEdges] = useState([]);
 
   const getCounts = (cube) => {
@@ -136,12 +137,43 @@ export default function CubeInput() {
     }
   };
 
-  const handleSendToRobot = () => {
-    alert(
-      `¡Enviando movimientos al Arduino!\nRuta de resolución: ${movesList}`
-    );
+  const canSendToRobot =
+    isValidated &&
+    movesList &&
+    movesList !== 'El cubo ya está resuelto.';
 
-    // Aquí irá el fetch/Web Serial hacia el backend o microcontrolador
+  const handleSendToRobot = async () => {
+    if (!canSendToRobot) {
+      setError(
+        'No hay una secuencia válida para enviar. Verifica el cubo y vuelve a calcular.'
+      );
+      return;
+    }
+
+    setSendingRobot(true);
+    setError('');
+
+    try {
+      const resp = await fetch('http://localhost:3000/api/robot/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secuencia: movesList })
+      });
+
+      const data = await resp.json();
+
+      if (resp.ok && data.exito) {
+        alert('✅ ' + (data.mensaje || 'Secuencia enviada al robot.'));
+      } else {
+        const msg = data.error || 'Error al enviar la secuencia al robot.';
+        setError(msg);
+      }
+    } catch (err) {
+      console.error('Error enviando al robot:', err);
+      setError('No se pudo conectar con el servidor para enviar al robot.');
+    } finally {
+      setSendingRobot(false);
+    }
   };
 
   const handleResetCube = () => {
@@ -202,7 +234,7 @@ export default function CubeInput() {
           to="/"
           className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
         >
-          <span>←</span> Volver al Panel
+          <span>←</span> Volver
         </Link>
 
         <h2 className="text-2xl font-bold">
@@ -315,14 +347,14 @@ export default function CubeInput() {
 
           <button
             onClick={handleSendToRobot}
-            disabled={!isValidated}
+            disabled={!canSendToRobot || sendingRobot}
             className={`font-bold py-2 rounded-lg transition-all text-sm shadow-lg ${
-              isValidated
+              canSendToRobot && !sendingRobot
                 ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer opacity-100'
                 : 'bg-gray-700 text-gray-500 cursor-not-allowed opacity-50'
             }`}
           >
-            Enviar al Robot 🤖
+            {sendingRobot ? 'Enviando...' : 'Enviar al Robot 🤖'}
           </button>
         </div>
       </div>

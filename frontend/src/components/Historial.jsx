@@ -5,7 +5,8 @@ export default function Historial() {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [backendUrl] = useState('http://localhost:5000');
+  const [selectedEvento, setSelectedEvento] = useState(null);
+  const [backendUrl] = useState('http://localhost:3000');
 
   useEffect(() => {
     fetchEventos();
@@ -38,6 +39,37 @@ export default function Historial() {
     return new Date(timestamp).toLocaleString('es-ES');
   };
 
+  const handleSelectEvento = (evento) => {
+    setSelectedEvento(evento);
+  };
+
+  const getEventoDetails = (evento) => {
+    const orderedKeys = [
+      'estado_inicial_procesado',
+      'estado inicial procesado',
+      'estado_inicial',
+      'estado inicial',
+      'orden',
+      'secuencia',
+      'movimientos',
+    ];
+
+    return Object.entries(evento)
+      .filter(([key]) => key !== '_id')
+      .sort(([a], [b]) => {
+        const indexA = orderedKeys.findIndex((item) => item === a.toLowerCase());
+        const indexB = orderedKeys.findIndex((item) => item === b.toLowerCase());
+
+        if (indexA !== -1 || indexB !== -1) {
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        }
+
+        return a.localeCompare(b);
+      });
+  };
+
   const limpiarHistorial = async () => {
     if (window.confirm('¿Estás seguro de que deseas eliminar todo el historial?')) {
       try {
@@ -66,12 +98,12 @@ export default function Historial() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-5">
-      <Link 
-        to="/" 
-        className="inline-block mb-5 px-5 py-3 bg-[#3498db] text-white no-underline rounded-lg font-semibold transition-all duration-300 border-2 border-[#3498db] hover:bg-[#2980b9] hover:border-[#2980b9] hover:-translate-x-1.5"
-      >
-        ← Volver a Inicio
-      </Link>
+      <Link
+          to="/"
+          className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
+        >
+          <span>←</span> Volver
+        </Link>
       
       <div className="max-w-[1200px] mx-auto p-[15px] md:p-5 bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] rounded-xl shadow-md min-h-[400px]">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 pb-[15px] border-b-2 border-[#ff6b6b] gap-[10px] md:gap-0">
@@ -152,9 +184,14 @@ export default function Historial() {
                       {Number(evento.tiempo_segundos).toFixed(2)}
                     </td>
                     <td className="p-[10px_8px] md:p-[12px_15px] break-words">
-                      <div className="text-[#7f8c8d] text-[13px] max-w-[150px] md:max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap">
-                        {evento.detalles || '-'}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectEvento(evento)}
+                        title={evento.detalles || 'Sin detalles'}
+                        className="w-full text-left text-[#7f8c8d] text-[13px] max-w-[150px] md:max-w-[250px] whitespace-normal hover:text-[#2c3e50] hover:underline"
+                      >
+                        {evento.detalles || 'Sin detalles'}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -162,6 +199,49 @@ export default function Historial() {
             </table>
             <div className="p-[15px] bg-[#f8f9fa] border-t border-[#ecf0f1] text-right text-[#7f8c8d] text-sm">
               <p>Total de registros: <strong className="text-gray-700">{eventos.length}</strong></p>
+            </div>
+          </div>
+        )}
+
+        {selectedEvento && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-5 border-b border-slate-200 bg-slate-50">
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900">Detalles completos del evento</h3>
+                  <p className="text-sm text-slate-600 mt-1">Visualiza el estado inicial y toda la información de la solicitud aquí.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEvento(null)}
+                  className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <div className="max-h-[80vh] overflow-y-auto p-6 space-y-5">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {getEventoDetails(selectedEvento).map(([key, value]) => {
+                    const content = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+                    const isPrimary = /estado_inicial_procesado|estado inicial procesado/i.test(key);
+                    const shouldSpanFull = isPrimary || /estado|orden|secuencia|procesado/i.test(key) || content.length > 120;
+                    console.log(selectedEvento.detalles);
+
+                    return (
+                      <div
+                        key={key}
+                        className={`rounded-2xl border ${isPrimary ? 'border-amber-300 bg-amber-50 shadow-lg' : 'border-slate-200 bg-slate-50'} p-4 ${shouldSpanFull ? 'md:col-span-2' : ''}`}
+                      >
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-500 mb-2">{key.replace(/_/g, ' ')}</p>
+                        <div className="overflow-x-auto">
+                          <pre className="whitespace-pre-wrap break-words text-sm text-slate-800">{content}</pre>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
