@@ -6,7 +6,7 @@ export default function Historial() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedEvento, setSelectedEvento] = useState(null);
-  const [backendUrl] = useState('http://134.122.24.115:5000');
+  const [backendUrl] = useState('http://134.122.24.115:3000');
 
   useEffect(() => {
     fetchEventos();
