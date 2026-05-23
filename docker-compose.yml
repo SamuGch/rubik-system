@@ -21,7 +21,7 @@ services:
       - mongodb
     environment:
       # Sobrescribimos la variable para que se conecte al contenedor, no a localhost
-      - MONGO_URI=mongodb://mongodb:27017/rubik_system
+      - MONGO_URI=mongodb://rubik-mongo:27017/rubik_system
     restart: always
 
   # 3. Tu Interfaz React
