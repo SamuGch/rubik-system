@@ -7,7 +7,7 @@ const Cube = require('cubejs');
 const { inicializarRobot, enviarSecuenciaAlRobot, actualizarPuerto} = require('./controllers/arduinoController');
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 // ==========================================
 // 1. INICIALIZACIÓN DE SERVICIOS
