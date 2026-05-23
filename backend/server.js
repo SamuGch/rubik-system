@@ -1,8 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const Cube = require('cubejs');
+//const Cube = require('cubejs');
 
+const { webcrypto } = require('crypto');
+global.crypto = webcrypto;
+
+const Cube = require('cubejs');
 // Importamos el controlador del robot que acabamos de crear
 const { inicializarRobot, enviarSecuenciaAlRobot, actualizarPuerto} = require('./controllers/arduinoController');
 
@@ -86,7 +90,10 @@ app.post('/api/solve', async (req, res) => {
         });
 
     } catch (error) {
-        res.status(400).json({ exito: false, error: "Configuración matemáticamente imposible." });
+	console.error("error definido", error);
+res.status(400).json({exito: false, error: `Error interno: ${error.message}`});
+	//console.error("#ERROR REAL SERVIDO:",error);
+        //res.status(400).json({ exito: false, error: "onfiguración matemáticamente imposible." });
     }
 });
 

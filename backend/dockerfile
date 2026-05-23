@@ -1,6 +1,6 @@
 # Usamos una imagen ligera de Node.js (Bullseye evita errores con la librería serialport)
-FROM node:18-bullseye-slim
-
+#FROM node:18-bullseye-slim
+FROM node:18
 # Creamos el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
