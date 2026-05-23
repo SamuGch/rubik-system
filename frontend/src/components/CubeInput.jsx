@@ -170,7 +170,7 @@ export default function CubeInput() {
     setError('');
 
     try {
-      const resp = await fetch('http://134.122.24.115:5000/api/robot/send', {
+      const resp = await fetch('http://134.122.24.115:3000/api/robot/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ secuencia: movesList })
