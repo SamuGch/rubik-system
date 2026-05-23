@@ -74,7 +74,7 @@ app.post('/api/solve', async (req, res) => {
             tipo_accion: 'resolucion_completada',
             movimientos: solucionReal || 'El cubo ya está resuelto.',
             tiempo_segundos: tiempoProcesamiento,
-            detalles: `Estado procesado: ${estado.substring(0, 15)}...`
+            detalles: `Estado procesado: ${estado}`
         });
         await nuevoEvento.save(); 
 
