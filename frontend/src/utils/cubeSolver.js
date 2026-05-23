@@ -32,7 +32,7 @@ export const solveRubik = async (estadoCubo) => {
     console.log("String enviado a Express:", formattedString);
 
     // 2. Enviar al backend
-    const response = await fetch('http://134.122.24.115:3000/api/solve', {
+    const response = await fetch('http://134.122.24.115:5000/api/solve', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
