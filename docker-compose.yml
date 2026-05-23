@@ -16,7 +16,7 @@ services:
     build: ./backend
     container_name: rubik-backend
     ports:
-      - "3000:3000"
+      - "5000:5000"
     depends_on:
       - mongodb
     environment:
