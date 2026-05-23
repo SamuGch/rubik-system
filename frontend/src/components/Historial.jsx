@@ -137,7 +137,7 @@ export default function Historial() {
             </p>
             <ul className="mt-[5px] text-xs list-disc pl-5">
               <li>MongoDB esté corriendo</li>
-              <li>El backend esté en puerto 5000</li>
+              <li>El backend esté en puerto 3000</li>
               <li>Ejecuta: <code>npm start</code> en la carpeta backend/</li>
             </ul>
           </div>

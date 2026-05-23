@@ -17,7 +17,7 @@ const PORT = 3000;
 inicializarRobot();
 
 // Conectar a MongoDB
-const MONGO_URI = 'mongodb://localhost:27017/rubik_system'; // Ajusta a 27018 si usaste ese puerto en Docker
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/rubik_system';
 mongoose.connect(MONGO_URI)
     .then(() => console.log('🍃 Conectado exitosamente a MongoDB'))
     .catch(err => console.error('❌ Error crítico al conectar a MongoDB:', err));

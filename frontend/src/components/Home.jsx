@@ -10,11 +10,11 @@ export default function Home() {
         <p className="text-xl text-gray-400">Sistema de resolución robótica e historial</p>
       </header>
 
-      {/* Indicador de Conexión a Base de Datos */}
+      {/* Indicador de Conexión a Base de Datos 
       <div className="mb-8 flex items-center bg-gray-800 px-4 py-2 rounded-full border border-gray-700">
         <div className="w-3 h-3 rounded-full bg-green-500 mr-3 animate-pulse"></div>
         <span className="text-sm font-medium">Conexión a BD: Establecida</span>
-      </div>
+      </div>*/}
 
       {/* Menú Principal (Botones de navegación) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
