@@ -1,50 +1,39 @@
+version: '3.8'
 
 services:
-  # 1. Base de Datos - MongoDB
+  # 1. Tu Base de Datos
   mongodb:
     image: mongo:latest
-    container_name: rubikbot_db
-    restart: always
+    container_name: rubik-mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-    networks:
-      - rubikbot_net
+    restart: always
 
-  # 2. Servidor Backend - Log de Eventos (Node.js/Express)
+  # 2. Tu Servidor Node.js
   backend:
     build: ./backend
-    container_name: rubikbot_backend
-    restart: always
+    container_name: rubik-backend
     ports:
-      - "5000:5000"
-    environment:
-      # Se conecta usando el nombre del contenedor de la BD ("mongodb")
-      - MONGO_URI=mongodb://mongodb:27017/rubikbot_logs 
-      - PORT=5000
+      - "3000:3000"
     depends_on:
       - mongodb
-    networks:
-      - rubikbot_net
+    environment:
+      # Sobrescribimos la variable para que se conecte al contenedor, no a localhost
+      - MONGO_URI=mongodb://mongodb:27017/rubik_system
+    restart: always
 
-  # 3. Frontend - Dashboard de Visualización (React)
+  # 3. Tu Interfaz React
   frontend:
     build: ./frontend
-    container_name: rubikbot_frontend
-    restart: always
+    container_name: rubik-frontend
     ports:
-      - "5173:80" # Puerto por defecto si usas Vite
+      - "8080:80"
     depends_on:
       - backend
-    networks:
-      - rubikbot_net
+    restart: always
 
-# Volúmenes para persistencia de datos
+# Definimos el volumen para que tus eventos de la BD no se borren si se apaga el servidor
 volumes:
   mongo_data:
-
-# Red interna para que los contenedores se comuniquen
-networks:
-  rubikbot_net:
-    driver: bridge

@@ -1,20 +1,20 @@
-# Usamos una imagen ligera de Node.js
-FROM node:20-alpine
+# Usamos una imagen ligera de Node.js (Bullseye evita errores con la librería serialport)
+FROM node:18-bullseye-slim
 
 # Creamos el directorio de trabajo dentro del contenedor
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copiamos los archivos de dependencias
+# Copiamos primero los archivos de dependencias para aprovechar el caché de Docker
 COPY package*.json ./
 
 # Instalamos las dependencias
 RUN npm install
 
-# Copiamos el resto del código (el server.js)
+# Copiamos el resto del código del backend
 COPY . .
 
-# Exponemos el puerto en el que corre nuestra app
-EXPOSE 5000
+# Exponemos el puerto que usa tu Express
+EXPOSE 3000
 
 # Comando para iniciar el servidor
 CMD ["node", "server.js"]
