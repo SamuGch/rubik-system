@@ -13,8 +13,8 @@ export default function Configuracion() {
     setMensaje({ texto: '', tipo: '' });
 
     try {
-      // Ajusta localhost:3000 si tu backend usa otro puerto
-      const response = await fetch('http://134.122.24.115:3000/api/robot/config', {
+      // Ajusta localhost:5000 si tu backend usa otro puerto
+      const response = await fetch('http://134.122.24.115:5000/api/robot/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ puerto: puerto.trim().toUpperCase() }), // Forzamos mayúsculas (ej. com3 -> COM3)
