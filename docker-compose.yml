@@ -1,0 +1,14 @@
+services:
+  # Base de Datos - MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: rubikbot_db
+    restart: always
+    ports:
+      - "27017:27017" # Expone el puerto 27017 hacia tu máquina local
+    volumes:
+      - mongo_data:/data/db # Mantiene tu historial a salvo aunque apagues el contenedor
+
+# Volumen para la persistencia de tus datos
+volumes:
+  mongo_data:
